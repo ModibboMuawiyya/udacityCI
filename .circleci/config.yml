@@ -5,36 +5,59 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  print_hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+  # print_hello:
+  #   # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+  #   # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   # Add steps to the job
+  #   # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+  #   steps:
+  #     - run: echo hello
+  # print_world:
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     - run: echo world 
+  # print_variable:
+  #   docker:
+  #     - image: cimg/base:2020.01
+  #   steps:
+  #     - run:
+  #         name: "Echo an env var that is part of our project"
+  #         command: |
+  #           echo $Name
+  
+  save_hello_world_output:
     docker:
       - image: circleci/node:13.8.0
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
-      - run: echo hello
-  print_world:
+      - run: echo "Hello World!!" > ~/output.txt
+      - persit_to_workspace:
+          root: ~/
+          paths:
+            - output.txt
+  print_output_file:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      - run: echo world 
-  print_variable:
-    docker:
-      - image: cimg/base:2020.01
-    steps:
-      - run:
-          name: "Echo an env var that is part of our project"
-          command: |
-            echo $Name
+      - attach_workspace:
+          at: ~/
+      - run: cat ~/output.txt 
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  welcome:
-    jobs:
-      - print_hello
-      - print_world:
+  # welcome:
+  #   jobs:
+  #     - print_hello
+  #     - print_world:
+  #         requires:
+  #           - print_hello
+  #     - print_variable
+  modi_workflow:
+    jobs: 
+      - save_hello_world_output
+      - print_output_file:
           requires:
-            - print_hello
-      - print_variable
+            - save_hello_world_output
